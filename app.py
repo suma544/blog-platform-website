@@ -6,6 +6,7 @@ Inkwell Blog - Backend (Flask + SQLAlchemy)
 - Comment section: logged-in users comment; comment author or post author can delete
 - RESTful JSON API, PostgreSQL / MySQL via DATABASE_URL, SQLite fallback for local dev
 """
+import hashlib
 import os
 import re
 from datetime import datetime, timezone
@@ -32,7 +33,16 @@ def database_url() -> str:
 
 
 app = Flask(__name__, static_folder=os.path.join(BASE_DIR, "static"), static_url_path="/static")
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret-change-me")
+def secret_key() -> str:
+    """SECRET_KEY env var if set; otherwise derived from the private DATABASE_URL so every deployment is unique."""
+    if os.environ.get("SECRET_KEY"):
+        return os.environ["SECRET_KEY"]
+    if os.environ.get("DATABASE_URL"):
+        return hashlib.sha256(("%s:%s" % (__name__, os.environ["DATABASE_URL"])).encode()).hexdigest()
+    return "dev-secret-change-me"  # local development only
+
+
+app.config["SECRET_KEY"] = secret_key()
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url()
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}

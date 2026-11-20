@@ -52,7 +52,7 @@ Set `DATABASE_URL` (see `.env.example`):
 Send the token as `Authorization: Bearer <token>`.
 
 ## Deploy
-**Vercel:** import the GitHub repo at vercel.com → add `DATABASE_URL` and `SECRET_KEY` env variables → Deploy.
+**Vercel:** import the GitHub repo at vercel.com → connect a Postgres database (Storage → Neon, sets `DATABASE_URL`) → Deploy. `SECRET_KEY` is optional — if not set, a unique key is derived from the private `DATABASE_URL`.
 
 **Heroku:**
 ```bash
